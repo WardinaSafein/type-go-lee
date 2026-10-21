@@ -144,10 +144,6 @@ body{
 
 .mute{background:none;border:0;color:var(--label);font-family:inherit;font-size:7px;cursor:pointer;text-shadow:1px 1px 0 var(--shell-lo);text-decoration:underline;padding:0}
 .sel{display:flex;gap:8px;justify-content:center;align-items:center;margin-top:22px;font-size:7px;color:var(--label);text-shadow:1px 1px 0 var(--shell-lo)}
-.speaker{
-  position:absolute;right:22px;bottom:18px;width:62px;height:46px;border-radius:4px;
-  background:repeating-linear-gradient(-30deg,transparent 0 5px,var(--shell-lo) 5px 7px);
-}
 .note{
   max-width:370px;margin-top:18px;
   font-family:Georgia,"Times New Roman",serif;font-size:15px;line-height:1.6;text-align:center;color:var(--ink);
@@ -297,8 +293,7 @@ body{
     </div>
   </div>
 
-  <div class="sel"><span>space kick</span><span>·</span><span>B reset</span><span>·</span><button class="mute" id="mute" aria-pressed="false">sound on</button></div>
-  <div class="speaker" aria-hidden="true"></div>
+  <div class="sel"><button class="mute" id="mute" aria-pressed="false">sound on</button></div>
 </div>
 
 <p class="note">Made for Lee. Thank you for being the best leader, and the best coach for me!</p>
