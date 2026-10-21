@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Go Lee! Best Coach</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+:root{
+  color-scheme: light;
+  --page:#fff4e3;
+  --ink:#2a2140;
+  --shell:#2fc4b2;
+  --shell-hi:#7fe3d6;
+  --shell-lo:#1a8d80;
+  --bezel:#2a2140;
+  --btnA:#ff5d73;
+  --btnA-lo:#b8324a;
+  --btnB:#ffb347;
+  --btnB-lo:#c27a1a;
+  --dpad:#3b3156;
+  --dpad-lo:#1f1930;
+  --label:#fff;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){ color-scheme:dark; --page:#1b1626; --ink:#f3ecff; }
+}
+:root[data-theme="dark"]{ color-scheme:dark; --page:#1b1626; --ink:#f3ecff; }
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+*{box-sizing:inherit;margin:0;padding:0}
+html,body{height:100%}
+body{
+  background:var(--page);
+  color:var(--ink);
+  font-family:"Press Start 2P","Courier New",Courier,monospace;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:100%;
+  padding:16px 12px 28px;
+  -webkit-tap-highlight-color:transparent;
+}
+
+.console{
+  width:100%;max-width:370px;
+  background:var(--shell);
+  border-radius:18px 18px 64px 18px;
+  padding:18px 16px 28px;
+  position:relative;
+  box-shadow:
+    inset 0 3px 0 var(--shell-hi),
+    inset 0 -6px 0 var(--shell-lo),
+    0 14px 30px rgba(42,33,64,.35);
+}
+.bezel{
+  background:var(--bezel);
+  border-radius:12px 12px 40px 12px;
+  padding:16px 16px 14px;
+  position:relative;
+}
+.bezel::before{
+  content:"";position:absolute;left:18px;right:18px;top:7px;height:3px;border-radius:2px;
+  background:linear-gradient(90deg,#ff5d73 0 33%,#ffb347 33% 66%,#2fc4b2 66%);
+}
+.screen{
+  position:relative;width:100%;aspect-ratio:10/9;
+  border-radius:4px;overflow:hidden;background:#7fd1f7;
+}
+.screen svg{display:block;width:100%;height:100%}
+
+.cheer{
+  text-align:center;
+  font-size:9px;line-height:1.9;
+  color:#fff;
+  text-shadow:2px 2px 0 var(--shell-lo);
+  padding:0 6px;
+  min-height:38px;
+  margin:14px 0 14px;
+}
+.cheer.goal{color:#ffe66d}
+.cheer.save{color:#ffd1d9}
+.shout{
+  position:absolute;left:12%;right:12%;top:19.4%;height:9.7%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:8px;color:#fff;text-shadow:1px 1px 0 #b8324a;
+  white-space:nowrap;pointer-events:none;
+}
+.shout.goal{color:#ffe66d}
+.shout.save{color:#2a2140;text-shadow:none}
+.hud{
+  position:absolute;left:0;right:0;bottom:6px;
+  display:flex;justify-content:space-between;
+  padding:0 8px;
+  font-size:7px;color:#fff;text-shadow:1px 1px 0 #2a2140;
+  pointer-events:none;
+}
+
+.banner{
+  position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;
+  gap:10px;background:rgba(42,33,64,.94);color:#ffe66d;text-align:center;padding:16px;
+}
+.banner.show{display:flex}
+.banner h1{font-size:16px;line-height:1.6;color:#ffe66d}
+.banner p{font-size:8px;line-height:1.9;color:#fff}
+.banner small{font-size:7px;color:#7fe3d6;margin-top:6px}
+.banner svg{width:56px;height:56px}
+
+
+.controls{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:0 6px;
+}
+.dpad{
+  display:grid;grid-template-columns:repeat(3,36px);grid-template-rows:repeat(3,36px);
+}
+.dpad button{
+  background:var(--dpad);border:0;color:#fff;font-family:inherit;font-size:10px;cursor:pointer;
+  box-shadow:inset 0 -4px 0 var(--dpad-lo);
+}
+.dpad button:active,.dpad button.on{box-shadow:inset 0 4px 0 var(--dpad-lo);color:#ffe66d}
+.dpad button:focus-visible{outline:2px solid #ffe66d;outline-offset:2px}
+.dpad .u{grid-area:1/2;border-radius:8px 8px 0 0;color:var(--dpad-lo);cursor:default}
+.dpad .d{grid-area:3/2;border-radius:0 0 8px 8px;color:var(--dpad-lo);cursor:default}
+.dpad .l{grid-area:2/1;border-radius:8px 0 0 8px}
+.dpad .c{grid-area:2/2}
+.dpad .r{grid-area:2/3;border-radius:0 8px 8px 0}
+.dpad .blank{background:transparent;box-shadow:none;cursor:default}
+
+.ab{display:flex;gap:14px;align-items:center}
+.ab button{
+  border-radius:50%;border:0;color:#fff;font-family:inherit;cursor:pointer;
+  text-shadow:1px 1px 0 rgba(0,0,0,.35);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+}
+.ab .a{width:64px;height:64px;font-size:14px;background:var(--btnA);box-shadow:inset 0 -6px 0 var(--btnA-lo)}
+.ab .a:active{box-shadow:inset 0 5px 0 var(--btnA-lo)}
+.ab .b{width:48px;height:48px;font-size:11px;background:var(--btnB);box-shadow:inset 0 -5px 0 var(--btnB-lo);margin-top:22px}
+.ab .b:active{box-shadow:inset 0 4px 0 var(--btnB-lo)}
+.ab button:focus-visible{outline:2px solid #fff;outline-offset:3px}
+.ab button:disabled{opacity:.55;cursor:default}
+.keycap{display:block;font-size:6px;margin-top:5px}
+
+.mute{background:none;border:0;color:var(--label);font-family:inherit;font-size:7px;cursor:pointer;text-shadow:1px 1px 0 var(--shell-lo);text-decoration:underline;padding:0}
+.sel{display:flex;gap:8px;justify-content:center;align-items:center;margin-top:22px;font-size:7px;color:var(--label);text-shadow:1px 1px 0 var(--shell-lo)}
+.speaker{
+  position:absolute;right:22px;bottom:18px;width:62px;height:46px;border-radius:4px;
+  background:repeating-linear-gradient(-30deg,transparent 0 5px,var(--shell-lo) 5px 7px);
+}
+.note{
+  max-width:370px;margin-top:18px;
+  font-family:Georgia,"Times New Roman",serif;font-size:15px;line-height:1.6;text-align:center;color:var(--ink);
+}
+
+/* confetti */
+.confetti rect{opacity:0}
+.confetti.go rect{animation:fall 1.4s ease-in forwards}
+@keyframes fall{
+  0%{opacity:1;transform:translateY(-10px)}
+  100%{opacity:0;transform:translateY(90px)}
+}
+/* net ripple */
+.net.ripple{animation:ripple .35s steps(2) 3}
+@keyframes ripple{50%{transform:translateX(2px)}}
+
+@media (prefers-reduced-motion: reduce){
+  #ball,#keeper,#striker{transition:none !important}
+  .confetti.go rect{animation-duration:.01s}
+  .net.ripple{animation:none}
+}
+</style>
+</head>
+<body>
+
+<div class="console">
+  <div class="bezel">
+    <div class="screen" id="screen">
+      <svg viewBox="0 0 160 144" aria-hidden="true" shape-rendering="crispEdges">
+        <!-- sky -->
+        <rect width="160" height="144" fill="#7fd1f7"/>
+        <g fill="#ffffff">
+          <rect x="10" y="10" width="14" height="4"/><rect x="14" y="7" width="7" height="3"/>
+          <rect x="120" y="16" width="16" height="4"/><rect x="124" y="13" width="8" height="3"/>
+        </g>
+        <!-- crowd -->
+        <rect x="0" y="40" width="160" height="22" fill="#5a4b8a"/>
+        <g id="crowd">
+          <g fill="#ff5d73"><rect x="4" y="44" width="4" height="4"/><rect x="28" y="48" width="4" height="4"/><rect x="60" y="44" width="4" height="4"/><rect x="92" y="48" width="4" height="4"/><rect x="124" y="44" width="4" height="4"/><rect x="152" y="48" width="4" height="4"/></g>
+          <g fill="#ffe66d"><rect x="12" y="50" width="4" height="4"/><rect x="40" y="44" width="4" height="4"/><rect x="72" y="50" width="4" height="4"/><rect x="104" y="44" width="4" height="4"/><rect x="136" y="50" width="4" height="4"/></g>
+          <g fill="#7fe3d6"><rect x="20" y="44" width="4" height="4"/><rect x="50" y="50" width="4" height="4"/><rect x="82" y="44" width="4" height="4"/><rect x="114" y="50" width="4" height="4"/><rect x="144" y="44" width="4" height="4"/></g>
+          <g fill="#ffb347"><rect x="34" y="54" width="4" height="4"/><rect x="66" y="56" width="4" height="4"/><rect x="98" y="54" width="4" height="4"/><rect x="130" y="56" width="4" height="4"/><rect x="8" y="56" width="4" height="4"/></g>
+        </g>
+        <!-- banner in the crowd -->
+        <rect x="18" y="27" width="124" height="16" fill="#ffe66d"/>
+        <rect x="19" y="28" width="122" height="14" fill="#ff5d73"/>
+        <!-- pitch -->
+        <rect x="0" y="62" width="160" height="82" fill="#58c84a"/>
+        <g fill="#4fb842">
+          <rect x="0" y="74" width="160" height="10"/><rect x="0" y="94" width="160" height="10"/><rect x="0" y="114" width="160" height="10"/><rect x="0" y="134" width="160" height="10"/>
+        </g>
+        <!-- goal -->
+        <rect x="26" y="62" width="108" height="4" fill="#ffffff"/>
+        <rect x="26" y="62" width="4" height="40" fill="#ffffff"/>
+        <rect x="130" y="62" width="4" height="40" fill="#ffffff"/>
+        <g class="net" id="net" stroke="#d9f3ff" stroke-width="1" opacity=".85">
+          <line x1="30" y1="72" x2="130" y2="72"/><line x1="30" y1="82" x2="130" y2="82"/><line x1="30" y1="92" x2="130" y2="92"/>
+          <line x1="40" y1="66" x2="40" y2="102"/><line x1="52" y1="66" x2="52" y2="102"/><line x1="64" y1="66" x2="64" y2="102"/><line x1="76" y1="66" x2="76" y2="102"/>
+          <line x1="88" y1="66" x2="88" y2="102"/><line x1="100" y1="66" x2="100" y2="102"/><line x1="112" y1="66" x2="112" y2="102"/><line x1="124" y1="66" x2="124" y2="102"/>
+        </g>
+        <!-- goal line, box -->
+        <rect x="0" y="102" width="160" height="2" fill="#ffffff"/>
+        <rect x="14" y="104" width="2" height="40" fill="#ffffff"/><rect x="144" y="104" width="2" height="40" fill="#ffffff"/>
+
+        <!-- keeper -->
+        <g id="keeper" style="transition:transform .3s cubic-bezier(.3,1.2,.5,1)">
+          <rect x="75" y="72" width="10" height="7" fill="#ffd3a6"/>
+          <rect x="75" y="70" width="10" height="3" fill="#3b3156"/>
+          <rect x="72" y="79" width="16" height="11" fill="#ffb347"/>
+          <rect x="66" y="81" width="6" height="4" fill="#ffb347"/><rect x="88" y="81" width="6" height="4" fill="#ffb347"/>
+          <rect x="63" y="80" width="4" height="5" fill="#ffffff"/><rect x="93" y="80" width="4" height="5" fill="#ffffff"/>
+          <rect x="74" y="90" width="5" height="9" fill="#3b3156"/><rect x="81" y="90" width="5" height="9" fill="#3b3156"/>
+        </g>
+
+        <!-- shooter: striker and ball move together with the d-pad -->
+        <g id="shooter" style="transition:transform .18s steps(3)">
+        <!-- striker (Lee) -->
+        <g id="striker" style="transition:transform .25s ease-out">
+          <rect x="58" y="108" width="10" height="7" fill="#ffd3a6"/>
+          <rect x="58" y="106" width="10" height="3" fill="#2a2140"/>
+          <rect x="56" y="115" width="14" height="11" fill="#ff5d73"/>
+          <rect x="60" y="117" width="6" height="2" fill="#ffffff"/>
+          <rect x="57" y="126" width="5" height="9" fill="#ffffff"/><rect x="64" y="126" width="5" height="9" fill="#ffffff"/>
+          <rect x="57" y="135" width="5" height="3" fill="#2a2140"/><rect x="64" y="135" width="5" height="3" fill="#2a2140"/>
+        </g>
+
+        <!-- ball -->
+        <g id="ball" style="transition:transform .42s cubic-bezier(.25,.8,.35,1)">
+          <rect x="77" y="130" width="6" height="6" fill="#ffffff"/>
+          <rect x="79" y="131" width="2" height="2" fill="#2a2140"/><rect x="78" y="133" width="1" height="1" fill="#2a2140"/><rect x="81" y="134" width="1" height="1" fill="#2a2140"/>
+        </g>
+        </g>
+
+        <!-- confetti -->
+        <g class="confetti" id="confetti">
+          <rect x="20" y="30" width="3" height="3" fill="#ff5d73" style="animation-delay:0s"/>
+          <rect x="35" y="25" width="3" height="3" fill="#ffe66d" style="animation-delay:.1s"/>
+          <rect x="50" y="28" width="3" height="3" fill="#7fe3d6" style="animation-delay:.05s"/>
+          <rect x="65" y="22" width="3" height="3" fill="#ffb347" style="animation-delay:.2s"/>
+          <rect x="80" y="30" width="3" height="3" fill="#ff5d73" style="animation-delay:.15s"/>
+          <rect x="95" y="24" width="3" height="3" fill="#ffffff" style="animation-delay:.08s"/>
+          <rect x="110" y="28" width="3" height="3" fill="#ffe66d" style="animation-delay:.25s"/>
+          <rect x="125" y="22" width="3" height="3" fill="#7fe3d6" style="animation-delay:.12s"/>
+          <rect x="140" y="30" width="3" height="3" fill="#ffb347" style="animation-delay:.3s"/>
+          <rect x="12" y="20" width="3" height="3" fill="#ffffff" style="animation-delay:.22s"/>
+          <rect x="42" y="18" width="3" height="3" fill="#ff5d73" style="animation-delay:.35s"/>
+          <rect x="72" y="16" width="3" height="3" fill="#7fe3d6" style="animation-delay:.28s"/>
+          <rect x="102" y="18" width="3" height="3" fill="#ffb347" style="animation-delay:.18s"/>
+          <rect x="132" y="16" width="3" height="3" fill="#ffe66d" style="animation-delay:.4s"/>
+          <rect x="150" y="24" width="3" height="3" fill="#ff5d73" style="animation-delay:.33s"/>
+        </g>
+      </svg>
+
+      <div class="shout" id="shout">GO LEE!</div>
+      <div class="hud"><span id="score">GOALS 0</span><span id="shots">SHOT 1 OF 5</span></div>
+
+      <div class="banner" id="banner">
+        <svg viewBox="0 0 16 16" shape-rendering="crispEdges" aria-hidden="true">
+          <rect x="3" y="2" width="10" height="2" fill="#ffe66d"/><rect x="2" y="4" width="12" height="5" fill="#ffe66d"/>
+          <rect x="4" y="9" width="8" height="2" fill="#ffe66d"/><rect x="6" y="11" width="4" height="2" fill="#ffb347"/>
+          <rect x="4" y="13" width="8" height="2" fill="#ffb347"/><rect x="1" y="4" width="1" height="3" fill="#ffe66d"/><rect x="14" y="4" width="1" height="3" fill="#ffe66d"/>
+        </svg>
+        <h1>BEST COACH</h1>
+        <p id="bannerText"></p>
+        <small>Press A to play again</small>
+      </div>
+    </div>
+  </div>
+
+  <div class="brand cheer" id="cheer">◀ ▶ move · A kick</div>
+
+  <div class="controls">
+    <div class="dpad" role="group" aria-label="Move Lee">
+      <button class="blank" tabindex="-1" aria-hidden="true"></button>
+      <button class="u" tabindex="-1" aria-hidden="true">▲</button>
+      <button class="blank" tabindex="-1" aria-hidden="true"></button>
+      <button class="l" data-aim="0" aria-label="Move left">◀</button>
+      <button class="c on" data-aim="1" aria-label="Move to middle">●</button>
+      <button class="r" data-aim="2" aria-label="Move right">▶</button>
+      <button class="blank" tabindex="-1" aria-hidden="true"></button>
+      <button class="d" tabindex="-1" aria-hidden="true">▼</button>
+      <button class="blank" tabindex="-1" aria-hidden="true"></button>
+    </div>
+    <div class="ab">
+      <button class="b" id="btnB" aria-label="Reset">B<span class="keycap">reset</span></button>
+      <button class="a" id="btnA" aria-label="Kick">A<span class="keycap">kick</span></button>
+    </div>
+  </div>
+
+  <div class="sel"><span>space kick</span><span>·</span><span>B reset</span><span>·</span><button class="mute" id="mute" aria-pressed="false">sound on</button></div>
+  <div class="speaker" aria-hidden="true"></div>
+</div>
+
+<p class="note">Made for Lee. Thank you for being the best leader, and the best coach for me!</p>
+
+<script>
+(function(){
+  /* tiny chiptune sound engine, no files needed */
+  var AC = window.AudioContext || window.webkitAudioContext;
+  var ctx = null, muted = false;
+  function audio(){ if (!AC) return null; if (!ctx) ctx = new AC(); if (ctx.state === 'suspended') ctx.resume(); return ctx; }
+  function tone(freq, start, dur, type, vol){
+    var c = audio(); if (!c || muted) return;
+    var o = c.createOscillator(), g = c.createGain();
+    o.type = type || 'square'; o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, c.currentTime + start);
+    g.gain.exponentialRampToValueAtTime(vol || 0.12, c.currentTime + start + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + start + dur);
+    o.connect(g); g.connect(c.destination);
+    o.start(c.currentTime + start); o.stop(c.currentTime + start + dur + 0.02);
+  }
+  function noise(start, dur, vol){
+    var c = audio(); if (!c || muted) return;
+    var len = Math.floor(c.sampleRate * dur), buf = c.createBuffer(1, len, c.sampleRate), d = buf.getChannelData(0);
+    for (var i = 0; i < len; i++) d[i] = (Math.random()*2-1) * (1 - i/len);
+    var src = c.createBufferSource(), g = c.createGain(), f = c.createBiquadFilter();
+    src.buffer = buf; f.type = 'bandpass'; f.frequency.value = 900;
+    g.gain.value = vol || 0.2;
+    src.connect(f); f.connect(g); g.connect(c.destination); src.start(c.currentTime + start);
+  }
+  var sfx = {
+    move: function(){ tone(520, 0, 0.05, 'square', 0.06); },
+    kick: function(){ noise(0, 0.12, 0.25); tone(140, 0, 0.1, 'triangle', 0.2); },
+    goal: function(){
+      [523, 659, 784, 1047].forEach(function(f, i){ tone(f, i*0.09, 0.14, 'square', 0.12); });
+      tone(1047, 0.4, 0.35, 'square', 0.12);
+      noise(0.3, 1.2, 0.12);
+    },
+    save: function(){ tone(220, 0, 0.12, 'square', 0.1); tone(165, 0.12, 0.25, 'square', 0.1); },
+    win: function(){
+      [392, 523, 659, 784, 659, 784, 1047].forEach(function(f, i){ tone(f, i*0.12, 0.2, 'square', 0.12); });
+      noise(0.5, 1.6, 0.12);
+    }
+  };
+  var muteBtn = document.getElementById('mute');
+  muteBtn.addEventListener('click', function(){
+    muted = !muted;
+    muteBtn.textContent = muted ? 'sound off' : 'sound on';
+    muteBtn.setAttribute('aria-pressed', muted ? 'true' : 'false');
+  });
+
+  var aimX = [-36, 0, 36];
+    var aim = 1;
+  var goals = 0, shot = 1, totalShots = 5, busy = false, over = false;
+
+  var keeperX = 0, keeperDir = 1, keeperSpeed = 0.9, keeperTimer = null;
+
+  var ball = document.getElementById('ball');
+  var keeper = document.getElementById('keeper');
+  var striker = document.getElementById('striker');
+  var shooter = document.getElementById('shooter');
+  var cheer = document.getElementById('cheer');
+  var shout = document.getElementById('shout');
+    var score = document.getElementById('score');
+  var shots = document.getElementById('shots');
+  var banner = document.getElementById('banner');
+  var bannerText = document.getElementById('bannerText');
+  var confetti = document.getElementById('confetti');
+  var net = document.getElementById('net');
+  var btnA = document.getElementById('btnA');
+  var btnB = document.getElementById('btnB');
+  var dpad = Array.prototype.slice.call(document.querySelectorAll('.dpad [data-aim]'));
+
+  var goalLines = [
+    'GOAL! GO LEE!',
+    'WHAT A STRIKE, LEE!',
+    'TOP CORNER!',
+    'BEST COACH!',
+    'LEE DOES IT AGAIN!',
+    'UNSTOPPABLE!',
+    'COACH ON FIRE!',
+    'PURE CLASS, LEE!',
+    'THE CROWD GOES WILD!',
+    'LEGEND!',
+    'TOO GOOD, LEE!',
+    'THAT’S OUR COACH!'
+  ];
+  var saveLines = [
+    'SAVED! GO AGAIN',
+    'OFF THE GLOVES!',
+    'SO CLOSE, LEE!',
+    'KEEPER GOT LUCKY',
+    'NEXT ONE’S IN, LEE'
+  ];
+
+  function setAim(i){
+    if (aim !== i) sfx.move();
+    aim = i;
+    shooter.style.transform = 'translate(' + aimX[i] + 'px,0)';
+    dpad.forEach(function(b){ b.classList.toggle('on', +b.dataset.aim === i); });
+  }
+  function setCheer(text, cls){
+    shout.textContent = text || 'GO LEE!';
+    shout.className = 'shout' + (cls ? ' ' + cls : '');
+  }
+  function updateHud(){
+    score.textContent = 'GOALS ' + goals;
+    shots.textContent = 'SHOT ' + Math.min(shot,totalShots) + ' OF ' + totalShots;
+  }
+
+  /* keeper shuffles side to side while you decide */
+  function startKeeper(){
+    stopKeeper();
+    keeperTimer = setInterval(function(){
+      keeperX += keeperDir * keeperSpeed;
+      if (keeperX > 30){ keeperX = 30; keeperDir = -1; }
+      if (keeperX < -30){ keeperX = -30; keeperDir = 1; }
+      keeper.style.transition = 'none';
+      keeper.style.transform = 'translate(' + keeperX.toFixed(1) + 'px,0)';
+    }, 33);
+  }
+  function stopKeeper(){ if (keeperTimer){ clearInterval(keeperTimer); keeperTimer = null; } }
+
+  /* he dives the way he was already moving; if he is near the middle he stays */
+  function keeperDecision(){
+    if (Math.abs(keeperX) < 8 && Math.random() < 0.5) return 1;
+    return keeperDir > 0 ? 2 : 0;
+  }
+
+  function kick(){
+    if (over){ reset(); return; }
+    if (busy) return;
+    busy = true;
+    btnA.disabled = true;
+    stopKeeper();
+    sfx.kick();
+
+    var dive = keeperDecision();
+    var isGoal = dive !== aim;
+
+    setCheer('', '');
+    striker.style.transform = 'translate(12px,-6px)';
+
+    setTimeout(function(){
+      ball.style.transform = 'translate(0,-48px)';
+    }, 120);
+
+    setTimeout(function(){
+      keeper.style.transition = 'transform .3s cubic-bezier(.3,1.2,.5,1)';
+      var diveX = [-34, 0, 34][dive];
+      keeper.style.transform = 'translate(' + diveX + 'px,' + (dive === 1 ? 0 : -6) + 'px) rotate(' + (dive === 0 ? -14 : dive === 2 ? 14 : 0) + 'deg)';
+      keeper.style.transformOrigin = '80px 85px';
+    }, 200);
+
+    setTimeout(function(){
+      if (isGoal){
+        goals++;
+        setCheer(goalLines[Math.floor(Math.random()*goalLines.length)], 'goal');
+        sfx.goal();
+        confetti.classList.remove('go'); void confetti.offsetWidth; confetti.classList.add('go');
+        net.classList.remove('ripple'); void net.offsetWidth; net.classList.add('ripple');
+      } else {
+        setCheer(saveLines[Math.floor(Math.random()*saveLines.length)], 'save');
+        sfx.save();
+        ball.style.transform = 'translate(' + ([-34,0,34][dive] - aimX[aim]) + 'px,-48px)';
+      }
+      updateHud();
+
+      setTimeout(function(){
+        if (shot >= totalShots){ finish(); return; }
+        shot++;
+        updateHud();
+        ball.style.transition = 'none';
+        ball.style.transform = 'translate(0,0)';
+        striker.style.transform = 'translate(0,0)';
+        keeper.style.transform = 'translate(' + keeperX.toFixed(1) + 'px,0)';
+        setTimeout(function(){ ball.style.transition = 'transform .42s cubic-bezier(.25,.8,.35,1)'; }, 40);
+        setCheer('', '');
+        busy = false;
+        btnA.disabled = false;
+        startKeeper();
+      }, 1500);
+    }, 620);
+  }
+
+  function finish(){
+    over = true;
+    var line;
+    if (goals === totalShots) line = 'Five out of five. The keeper never stood a chance.';
+    else if (goals >= 3) line = goals + ' out of ' + totalShots + '. Still the best coach we know.';
+    else line = goals + ' out of ' + totalShots + '. Doesn’t matter one bit. Still the best coach.';
+    bannerText.innerHTML = line + '<br><br>Thank you, Lee.';
+    banner.classList.add('show');
+    sfx.win();
+    btnA.disabled = false;
+    busy = false;
+  }
+
+  function reset(){
+    goals = 0; shot = 1; over = false; busy = false;
+    banner.classList.remove('show');
+    ball.style.transition = 'none';
+    ball.style.transform = 'translate(0,0)';
+    striker.style.transform = 'translate(0,0)';
+    keeperX = 0; keeperDir = 1;
+    setTimeout(function(){ ball.style.transition = 'transform .42s cubic-bezier(.25,.8,.35,1)'; }, 40);
+    btnA.disabled = false;
+    setAim(1);
+    updateHud();
+    setCheer('', '');
+    startKeeper();
+  }
+
+  dpad.forEach(function(b){
+    b.addEventListener('click', function(){ if(!busy && !over) setAim(+b.dataset.aim); });
+  });
+  btnA.addEventListener('click', kick);
+  btnB.addEventListener('click', reset);
+  document.addEventListener('keydown', function(e){
+    if (e.key === 'ArrowLeft'){ e.preventDefault(); if(!busy && !over) setAim(Math.max(0, aim-1)); }
+    else if (e.key === 'ArrowRight'){ e.preventDefault(); if(!busy && !over) setAim(Math.min(2, aim+1)); }
+    else if (e.key === ' ' || e.key === 'Enter' || e.key.toLowerCase() === 'a'){ e.preventDefault(); kick(); }
+    else if (e.key.toLowerCase() === 'b'){ reset(); }
+  });
+
+  setAim(1);
+  updateHud();
+  startKeeper();
+})();
+</script>
+</body>
+</html>
